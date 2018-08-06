@@ -1,0 +1,15 @@
+.square {
+    width: 100px;
+    height: 100px;
+    border: 2px solid #000;
+    margin-right: 1px;
+    margin-bottom: 1px;
+    text-align: center;
+    line-height: 100px;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    font-size: 28px;
+}
