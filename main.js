@@ -1,5 +1,7 @@
 const turnMap = ['O', 'X'];
-const mapSize = 5;
+const turnClass = ['o-class', 'x-class'];
+const mapSize = 8;
+const countToWin = 5;
 
 let currentTurn = 0;
 
@@ -41,6 +43,7 @@ function drawMap(map) {
 
 function startNewGame() {
   map = generateMap(mapSize);
+  drawMap(map);
   
   currentTurn = 0;
   
@@ -50,34 +53,90 @@ function startNewGame() {
 }
 
 function checkWin() {
-  let won = true;
-  
   for (let row = 0; row < map.length; row += 1) {
-    if (map[row].every((item) => item === turnMap[ currentTurn ])) {
-      return true;
+    let elementInRow = 0;
+    for (let col = 0; col < map[ row ].length; col += 1) {
+      if (map[ row ][ col ] === turnMap[ currentTurn ]) {
+        elementInRow += 1;
+      }
+      
+      if (elementInRow === countToWin) {
+        return true;
+      }
     }
   }
   
   for (let col = 0; col < map.length; col += 1) {
-    if (map[0][col] === turnMap[currentTurn] &&
-        map[1][col] === turnMap[currentTurn] &&
-        map[2][col] === turnMap[currentTurn]) {
+    let elementInCol = 0;
+    for (let row = 0; row < map.length; row += 1) {
+      if (map[ row ][ col ] === turnMap[ currentTurn ]) {
+        elementInCol += 1;
+      }
+      
+      if (elementInCol === countToWin) {
+        return true;
+      }
+    }
+  }
+  
+  let secondDiagonalCount = 0;
+  
+  for (let diagonal = 0; diagonal < map.length; diagonal += 1) {
+    
+    if (map[ map.length - diagonal - 1 ][ diagonal ] === turnMap[ currentTurn ]) {
+      secondDiagonalCount += 1;
+    }
+    
+    if (secondDiagonalCount === countToWin) {
       return true;
     }
   }
   
-  for (let diagonal = 0; diagonal < map.length; diagonal += 1) {
+  let mainDiagonalBottom = 0;
+  let mainDiagonalTop = 0;
+  let secondDiagonalTop = 0;
+  let secondDiagonalBottom = 0;
+  let topIndex = 0;
   
-    if (map[ diagonal ][ diagonal ] !== turnMap[ currentTurn ]) {
-      won = false;
-    }
+  for (let step = 0; step < map.length; step += 1) {
+    mainDiagonalBottom = 0;
+    mainDiagonalTop = 0;
+    secondDiagonalTop = 0;
+    secondDiagonalBottom = 0;
+    topIndex = step;
+    
+    for (let row = step; row < map.length; row += 1) {
+      let col = row - step;
+      if (map[row][col] === turnMap[ currentTurn ]) {
+        mainDiagonalBottom += 1;
+      }
   
-    if (map[map.length - diagonal - 1][diagonal] !== turnMap[currentTurn]) {
-      won = false;
+      if (map[col][row] === turnMap[ currentTurn ]) {
+        mainDiagonalTop += 1;
+      }
+  
+      if ((mainDiagonalBottom === countToWin) || (mainDiagonalTop === countToWin)) {
+        return true;
+      }
+  
+  
+      if (map[row][map.length - row + step - 1] === turnMap[ currentTurn ]) {
+        secondDiagonalBottom += 1;
+      }
+      
+      if (map[row][topIndex] === turnMap[ currentTurn ]) {
+        secondDiagonalTop += 1;
+      }
+      
+      topIndex -= 1;
+      
+      if ((secondDiagonalBottom === countToWin) || (secondDiagonalTop === countToWin)) {
+        return true;
+      }
     }
   }
   
-  return won;
+  return false;
 }
 
 function checkDraw() {
@@ -110,6 +169,7 @@ function onUserSquareClick(event) {
     return;
   }
   event.target.innerHTML = turnMap[currentTurn];
+  event.target.classList.add(turnClass[currentTurn]);
   map[elementData.row][elementData.item] = turnMap[currentTurn];
   if (checkWin()) {
     alert(turnMap[currentTurn] + ' won');
@@ -124,7 +184,6 @@ function onUserSquareClick(event) {
 
 
 function main() {
-  drawMap(generateMap(mapSize));
   startNewGame();
   document.querySelector('#container').addEventListener('click', onUserSquareClick);
 }
