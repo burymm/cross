@@ -124,15 +124,21 @@ function checkWin() {
         secondDiagonalBottom += 1;
       }
       
-      if (map[row][topIndex] === turnMap[ currentTurn ]) {
+      if (secondDiagonalBottom === countToWin) {
+        return true;
+      }
+    }
+    
+    for (let topIndexRow = 0; topIndexRow < map.length; topIndexRow += 1) {
+      if (topIndex >= 0 && map[topIndexRow][topIndex] === turnMap[ currentTurn ]) {
         secondDiagonalTop += 1;
       }
       
-      topIndex -= 1;
-      
-      if ((secondDiagonalBottom === countToWin) || (secondDiagonalTop === countToWin)) {
+      if (secondDiagonalTop === countToWin) {
         return true;
       }
+  
+      topIndex -= 1;
     }
   }
   
