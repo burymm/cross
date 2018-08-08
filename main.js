@@ -1,7 +1,7 @@
 const turnMap = ['O', 'X'];
 const turnClass = ['o-class', 'x-class'];
 const mapSize = 8;
-const countToWin = 5;
+const COUNT_TO_WIN = 5;
 
 let currentTurn = 0;
 
@@ -42,17 +42,25 @@ function drawMap(map) {
 }
 
 function startNewGame() {
-  map = generateMap(mapSize);
+  const settings = loadSettings();
+  
+  map = generateMap(settings && parseInt(settings.size) || mapSize);
   drawMap(map);
   
   currentTurn = 0;
   
   document.querySelectorAll('.square').forEach((item) => {
     item.innerHTML = '';
-  })
+  });
+  
+  document.querySelector('#size').value = settings && settings.size;
+  document.querySelector('#win-count').value = settings && settings.countToWin;
 }
 
 function checkWin() {
+  const settings = loadSettings();
+  const countToWin = settings && parseInt(settings.countToWin) || COUNT_TO_WIN;
+  
   for (let row = 0; row < map.length; row += 1) {
     let elementInRow = 0;
     for (let col = 0; col < map[ row ].length; col += 1) {
@@ -178,20 +186,58 @@ function onUserSquareClick(event) {
   event.target.classList.add(turnClass[currentTurn]);
   map[elementData.row][elementData.item] = turnMap[currentTurn];
   if (checkWin()) {
-    alert(turnMap[currentTurn] + ' won');
-    startNewGame();
+    const won = turnMap[currentTurn];
+    setTimeout(() => {
+      alert(won + ' won');
+      startNewGame();
+    }, 100);
+    
   } else if (checkDraw()) {
-    alert('DRAW, no one win');
-    startNewGame();
+    setTimeout(() => {
+      alert('DRAW, no one win');
+      startNewGame();
+    }, 100);
   }
   console.log('user click', map);
   nextTurn();
 }
 
 
+function onSettingsPanelClick(event) {
+  event.target.classList.toggle('open');
+}
+
+function saveSettings(settings) {
+  if (isNaN(settings.size) || isNaN(settings.countToWin)) {
+    throw new Error('settings should be value');
+  }
+  
+  localStorage.setItem('settings', JSON.stringify(settings));
+  return true;
+}
+
+function loadSettings() {
+  const settings = localStorage.getItem('settings');
+  
+  return settings ? JSON.parse(settings) : null;
+}
+
+function onSaveSetting(event) {
+  event.preventDefault();
+  
+  const size = parseInt(document.querySelector('#size').value);
+  const countToWin = parseInt(document.querySelector('#win-count').value);
+  
+  if (saveSettings({ size, countToWin })) {
+    location.reload();
+  }
+}
+
 function main() {
   startNewGame();
   document.querySelector('#container').addEventListener('click', onUserSquareClick);
+  document.querySelector('#settings-panel').addEventListener('click', onSettingsPanelClick);
+  document.querySelector('#save-button').addEventListener('click', onSaveSetting);
 }
 
 document.addEventListener("DOMContentLoaded", main);
